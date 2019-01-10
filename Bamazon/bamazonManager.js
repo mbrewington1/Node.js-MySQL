@@ -1,4 +1,3 @@
-var config = require("./config.js");
 var inquirer = require("inquirer");
 var mysql = require("mysql");
 require("console.table");
@@ -6,7 +5,15 @@ require("console.table");
 var item_id = 0;
 var quality = 0;
 
-var dbConnection = mysql.createConnection(config);
+var dbConnection = mysql.createConnection({
+	
+	host: "localhost",
+	user: "root",
+	password: "root",
+	database: "bamazon"
+  
+});
+
 dbConnection.connect(function(err){
 	if(err) throw err;
 	list_option();
@@ -44,7 +51,7 @@ function list_option(){
 };
 
 function view_product(){
-	dbConnection.query("select item_id, product_name, price, stock_quality from product", function(err, result){
+	dbConnection.query("select id, product_name, price, product_quantity from products", function(err, result){
 		if(err) throw err;
 		console.table(result);
 		list_option();
@@ -52,7 +59,7 @@ function view_product(){
 };
 
 function view_lowInventory(){
-	dbConnection.query("select item_id, product_name, price, stock_quality from product Where stock_quality < 5", function(err, result){
+	dbConnection.query("select id, product_name, price, product_quantity from products Where product_quantity < 5", function(err, result){
 		if(err) throw err;
 		console.table(result);
 		list_option();
@@ -73,7 +80,7 @@ function add_inventory(){
 		}
 	},
 	{
-		name: "quality",
+		name: "quantity",
 		type: "input",
 		message: "how many do you want to add?",
 		validate:function(value){
@@ -83,8 +90,8 @@ function add_inventory(){
 		}
 	}]).then(function(result){
 		item_id = parseInt(result.item);
-		quality = parseInt(result.quality);
-		dbConnection.query("update product set stock_quality=stock_quality+? where item_id=?",[quality, item_id], function(err){
+		quantity = parseInt(result.quantity);
+		dbConnection.query("update products set product_quantity=product_quantity+? where id=?",[quantity, item_id], function(err){
 				if(err) throw err;
 			});
 		list_option();
@@ -93,17 +100,12 @@ function add_inventory(){
 
 function add_new_product(){
 	inquirer.prompt([
-	{
-		name: "item_id",
-		type: "input",
-		message: "what is the item_id?",
-		validate: function(value){
-			if (parseInt(value) >10){
-				return true;
-			}
-			return false;
-		}
-	},
+	// {
+	// 	name: "id",
+	// 	type: "input",
+	// 	message: "what is the id?",
+		
+	// },
 	{
 		name: "product_name",
 		type:"input",
@@ -120,11 +122,12 @@ function add_new_product(){
 		message: "what is the price for this item",
 	},
 	{
-		name: "stock_quality",
+		name: "product_quantity",
 		type: "input",
 		message: "how many do you have",
 	}]).then(function(result){
-		dbConnection.query("insert into product (item_id, product_name, department_name, price, stock_quality) values (?,?,?,?,?);",[result["item_id"], result["product_name"], result["department_name"], result.price, result["stock_quality"]],function(err){
+		console.log(result);
+		dbConnection.query("insert into products (product_name, department, price, product_quantity) values (?,?,?,?);", [result["product_name"], result["department_name"], result.price, result["product_quantity"]], function(err){
 			if(err) throw err;
 		});
 		list_option();

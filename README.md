@@ -1,0 +1,5 @@
+![demo of bamazoncustomer](/images/bamazonCustomer.gif)
+![demo of bamazonmanager-1](/images/bamazonManager-1.gif)
+![demo of bamazonmanager-2](/images/bamazonManager-2.gif)
+![demo of bamazonmanager-3](/images/bamazonManager-3.gif) 
+![demo of bamazonmanager-4](/images/bamazonManager-4.gif)

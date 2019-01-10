@@ -1,9 +1,18 @@
-var config = require("./config.js");
 var inquirer = require("inquirer");
 var mysql = require("mysql");
 require("console.table");
-var dbConnection = mysql.createConnection(config);
-var department_name=[];
+
+var item_id = 0;
+var quality = 0;
+
+var dbConnection = mysql.createConnection({
+	
+	host: "localhost",
+	user: "root",
+	password: "root",
+	database: "bamazon"
+
+});
 
 dbConnection.connect(function(err){
 	if (err) throw err;

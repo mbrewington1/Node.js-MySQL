@@ -1,11 +1,18 @@
-var config = require("./config.js");
-var inquirer = require("inquirer");
-var mysql = require("mysql");
+
+const inquirer = require("inquirer");
+const mysql = require("mysql");
 require("console.table");
-var dbConnection = mysql.createConnection(config);
+var dbConnection = mysql.createConnection({
+	
+		host: "localhost",
+		user: "root",
+		password: "root",
+		database: "bamazon"
+	  
+});
 var item_id = 0;
-var quality = 0;
-var stock_quality = 0;
+var quantity = 0;
+var stock_quantity = 0;
 var sales = 0;
 var column_name = [];
 
@@ -15,7 +22,7 @@ dbConnection.connect(function(err){
 });
 
 function display_item(action){
-	dbConnection.query("select item_id, product_name, price from product", function(err, result){
+	dbConnection.query("select id, product_name, price from products", function(err, result){
 		if (err) throw err;
 		console.table(result);
 		if(select_item){
@@ -38,7 +45,7 @@ function select_item(action){
 		}
 	},
 	{
-		name: "quality",
+		name: "quantity",
 		type: "input",
 		message: "how many do you want to purchase?",
 		validate:function(value){
@@ -49,31 +56,31 @@ function select_item(action){
 		}
 	}]).then(function(result){
 		item_id = parseInt(result.item);
-		quality = parseInt(result.quality);
-		if (check_quality){
-			check_quality();
+		quantity = parseInt(result.quantity);
+		if (check_quantity){
+			check_quantity();
 			}
 	});	
 };
 
-function check_quality(action){
-	dbConnection.query("select stock_quality from product where item_id = ?", item_id, function(err, result){
-		var quality_value = JSON.parse(JSON.stringify(result))[0]["stock_quality"];
-		if (quality > quality_value){
-			console.log("Insufficient quality!");
+function check_quantity(action){
+	dbConnection.query("select product_quantity from products where id = ?", item_id, function(err, result){
+		var quantity_value = JSON.parse(JSON.stringify(result))[0]["product_quantity"];
+		if (quantity > quantity_value){
+			console.log("Insufficient quantity!");
 			dbConnection.end();
 		}else{
-			stock_quality = quality_value - quality;
-			dbConnection.query("update product set stock_quality=? where item_id=?",[stock_quality, item_id], function(err){
+			stock_quantity = quantity_value - quantity;
+			dbConnection.query("update products set product_quantity=? where id=?",[stock_quantity, item_id], function(err){
 				if(err) throw err;
 			});
-			dbConnection.query("select price from product where item_id=?",[item_id], function(err, result){
+			dbConnection.query("select price from products where id=?",[item_id], function(err, result){
 				if (err) throw err;
 				var price = JSON.parse(JSON.stringify(result))[0]["price"];
-				sales = price*quality;
+				sales = price*quantity;
 				console.log("Your total cost is: " + sales);
 				if(update_sales){
-				update_sales();
+				//update_sales();
 				};
 			});
 		};
@@ -82,9 +89,9 @@ function check_quality(action){
 
 
 function update_sales(){
-	dbConnection.query('show columns from product',function(err, result){
+	dbConnection.query('show columns from products',function(err, result){
 		if(err) throw err;
-		// JSON.parse(JSON.stringify(result))[0]["stock_quality"];
+		// JSON.parse(JSON.stringify(result))[0]["stock_quantity"];
 		var result = JSON.parse(JSON.stringify(result));
 		for (var i =0; i < result.length; i++){
 			column_name.push(result[i]["Field"]);
